@@ -59,20 +59,18 @@
     <Reference Include="mscorlib.extensions" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Adder.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DistanceAlgoritam.cs" />
-    <Compile Include="GLocation.cs" />
-    <Compile Include="GPoint.cs" />
-    <Compile Include="GPointConverter.cs" />
-    <Compile Include="GPointEventArgs.cs" />
+    <Compile Include="Model\GLocation.cs" />
+    <Compile Include="Model\GPoint.cs" />
+    <Compile Include="Controler\GPointConverter.cs" />
+    <Compile Include="Model\GPointEventArgs.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tasks.cs" />
+    <Compile Include="Controler\Tasks.cs" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

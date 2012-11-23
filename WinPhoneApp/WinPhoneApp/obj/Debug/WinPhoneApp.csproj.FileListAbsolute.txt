@@ -11,3 +11,16 @@ D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\WinPhoneApp.g.resour
 D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\WinPhoneApp.dll
 D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\WinPhoneApp.pdb
 D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\XapCacheFile.xml
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\Bin\Debug\ApplicationIcon.png
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\Bin\Debug\Background.png
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\Bin\Debug\WinPhoneApp.dll
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\Bin\Debug\WinPhoneApp.pdb
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\Bin\Debug\AppManifest.xaml
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\Bin\Debug\WinPhoneApp.xap
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\obj\Debug\ResolveAssemblyReference.cache
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\obj\Debug\App.g.i.cs
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\obj\Debug\MainPage.g.i.cs
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\obj\Debug\WinPhoneApp.g.resources
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\obj\Debug\WinPhoneApp.dll
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\obj\Debug\WinPhoneApp.pdb
+D:\GitHub\gRoute\WinPhoneApp\WinPhoneApp\obj\Debug\XapCacheFile.xml
