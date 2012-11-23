@@ -1,0 +1,13 @@
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\Bin\Debug\ApplicationIcon.png
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\Bin\Debug\Background.png
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\Bin\Debug\WinPhoneApp.dll
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\Bin\Debug\WinPhoneApp.pdb
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\Bin\Debug\AppManifest.xaml
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\Bin\Debug\WinPhoneApp.xap
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\ResolveAssemblyReference.cache
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\App.g.i.cs
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\MainPage.g.i.cs
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\WinPhoneApp.g.resources
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\WinPhoneApp.dll
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\WinPhoneApp.pdb
+D:\Work\VisualStudio 2010\WinPhoneApp\WinPhoneApp\obj\Debug\XapCacheFile.xml
