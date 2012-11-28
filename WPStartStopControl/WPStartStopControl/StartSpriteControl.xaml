@@ -1,0 +1,29 @@
+﻿<UserControl
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d"
+	x:Class="WPStartStopControl.StartSpriteControl"
+	d:DesignWidth="95.241" d:DesignHeight="60.411">
+
+	<Grid x:Name="LayoutRoot" Background="Transparent">
+		<Rectangle x:Name="Sprite1">
+			<Rectangle.Fill>
+				<LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+					<GradientStop Color="#FFCDEB9A" Offset="0.058" />
+					<GradientStop Color="#FF9CF535" Offset="1" />
+				</LinearGradientBrush>
+			</Rectangle.Fill>
+		</Rectangle>
+		
+		<Rectangle x:Name="Sprite2" >
+			<Rectangle.Fill>
+				<LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+					<GradientStop Color="#FFCDEB9A" Offset="0.058" />
+					<GradientStop Color="#FF9CF535" Offset="1" />
+				</LinearGradientBrush>
+			</Rectangle.Fill>
+		</Rectangle>
+	</Grid>
+</UserControl>
