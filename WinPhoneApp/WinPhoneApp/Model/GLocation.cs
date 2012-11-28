@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Device.Location;
+using WinPhoneApp.Model;
 
 namespace WinPhoneApp
 {
@@ -23,6 +24,8 @@ namespace WinPhoneApp
 
         public event NewGPoint OnNewGPoint;
 
+        #region Constrcotrs
+
         public GLocation()
         {
             geoWatcher = new GeoCoordinateWatcher(defGeoPositionAccuracy);
@@ -31,33 +34,7 @@ namespace WinPhoneApp
         {
             geoWatcher = new GeoCoordinateWatcher(geoPositionAccuracy);
         }
-
-        private void StartGLocation()
-        {
-            if (geoWatcher == null)
-            {
-                geoWatcher = new GeoCoordinateWatcher(defGeoPositionAccuracy);
-            }
-            geoWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(geoWatcher_PositionChanged);
-            geoWatcher.MovementThreshold = 0;
-            bool haveLocaion = geoWatcher.TryStart(true, TimeSpan.FromMilliseconds(3000));
-            if (haveLocaion == false)
-            {
-                MessageBox.Show("Can not start location services");//TO-DO Make Exception Here
-            }
-
-            if (geoWatcher.Status == GeoPositionStatus.Disabled)
-            {
-                MessageBox.Show("GPS is disabled");//TO-DO Make Exception Here
-            }
-            else
-            {
-                if (geoWatcher.Permission != GeoPositionPermission.Granted)
-                {
-                    MessageBox.Show("This application has no acces to GPS");//TO-DO Make Exception Here
-                }
-            }
-        }
+        #endregion
 
         public void StartGLocationWithEvent()
         {
@@ -69,20 +46,58 @@ namespace WinPhoneApp
             if (geoWatcher != null)
             {
                 geoWatcher.Stop();
+                geoWatcher.PositionChanged -= new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(geoWatcher_PositionChanged);
             }
         }
-        void geoWatcher_PositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
+
+        public GPoint GetCurrentPoint()
         {
-            if (e.Position.Location.IsUnknown == true)
+            return MakeGPointFromGeoCoordinatePostion(geoWatcher.Position);
+        }
+
+        #region PrivateFuntions
+
+        private void StartGLocation()
+        {
+            if (geoWatcher == null)
             {
-                OnNewGPoint(this, new GPointEventArgs(new GPoint(-999, -999, -999)));
+                geoWatcher = new GeoCoordinateWatcher(defGeoPositionAccuracy);
+            }
+            geoWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(geoWatcher_PositionChanged);
+
+            bool haveLocaion = geoWatcher.TryStart(true, TimeSpan.FromMilliseconds(3000));
+            if (haveLocaion == false)
+            {
+                MessageBox.Show("Can not start location services");//TO-DO Make Exception Here
             }
             else
             {
-                GPoint newPoint = MakeGPointFromGeoCoordinate(e);
+                if (geoWatcher.Status == GeoPositionStatus.Disabled)
+                {
+                    MessageBox.Show("GPS is disabled");//TO-DO Make Exception Here
+                }
+                else
+                {
+                    if (geoWatcher.Permission != GeoPositionPermission.Granted)
+                    {
+                        MessageBox.Show("This application has no acces to GPS");//TO-DO Make Exception Here
+                    }
+                }
+            }
+        }
+
+        private void geoWatcher_PositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
+        {
+            if (e.Position.Location.IsUnknown == true)
+            {
+                OnNewGPoint(this, new GPointEventArgs(new GPoint(0, 0, 0)));
+            }
+            else
+            {
+                GPoint newPoint = MakeGPointFromGeoCoordinatePostion(e.Position);
                 if (lastPoint != null)
                 {
-                    if (lastPoint.IsEqual(newPoint))
+                    if (lastPoint.IsEqual(newPoint, true, gSystemSettings.ComparingPointSeconds))
                     {
                         return;//It's the same location  - this is not a new point
                     }
@@ -94,27 +109,29 @@ namespace WinPhoneApp
 
         }
 
-
-        public GPoint GetCurrentPoint()
+        private GPoint MakeGPointFromGeoCoordinatePostion(GeoPosition<GeoCoordinate> position)
         {
             GPoint currentPoint = new GPoint();
 
-            if (geoWatcher.Position.Location.IsUnknown == false)
+            if (position.Location.IsUnknown == false)
             {
-                currentPoint.Long = geoWatcher.Position.Location.Longitude;
-                currentPoint.Lat = geoWatcher.Position.Location.Latitude;
-            }else{
-                currentPoint.Long = -999;
-                currentPoint.Lat = -999;
+                currentPoint.Longitude = position.Location.Longitude;
+                currentPoint.Latitude = position.Location.Latitude;
+                currentPoint.Speed = position.Location.Speed;
+                currentPoint.Altitude = position.Location.Altitude;
+                currentPoint.TimeTaken = position.Timestamp;
             }
+            else
+            {
+                currentPoint.Longitude = 0;
+                currentPoint.Latitude = 0;
+            }
+
+            System.Diagnostics.Debug.WriteLine(position.Timestamp.ToString());
             return currentPoint;
         }
 
-        private GPoint MakeGPointFromGeoCoordinate(GeoPositionChangedEventArgs<GeoCoordinate> coordinate)
-        {
-            GPoint currentPoint = new GPoint(coordinate.Position.Location.Longitude,coordinate.Position.Location.Latitude);
+        #endregion
 
-            return currentPoint;
-        }
     }
 }

@@ -41,7 +41,7 @@ namespace WinPhoneApp
             GPoint currPoint = gLocationSystem.GetCurrentPoint();
             if (currPoint.IsValid)
             {
-                gPoints.Add(new GPoint(currPoint.Long, currPoint.Lat, gPoints.Count + 1));
+                gPoints.Add(new GPoint(currPoint.Longitude, currPoint.Latitude, gPoints.Count + 1));
             }
            
         }
@@ -64,6 +64,10 @@ namespace WinPhoneApp
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
+            //Just to invoke test
+            Test.TestGPoint.TestIsEqual();
+
+
             gPoints.Clear();
             PointsConsole.Text = "";
             CurrentPointTextBlock.Text = "";
@@ -73,8 +77,8 @@ namespace WinPhoneApp
             GPoint currPoint = gLocationSystem.GetCurrentPoint();
             if (currPoint.IsValid)
             {
-                TopValueTextBox.Text = currPoint.Long.ToString();
-                BottomValueTextBox.Text = currPoint.Lat.ToString();
+                TopValueTextBox.Text = currPoint.Longitude.ToString();
+                BottomValueTextBox.Text = currPoint.Latitude.ToString();
 
                 CurrentPointTextBlock.Text = currPoint.ToString();
             }
@@ -84,10 +88,10 @@ namespace WinPhoneApp
         {
             if (e.Point.IsValid)
             {
-                gPoints.Add(new GPoint(e.Point.Long, e.Point.Lat, gPoints.Count + 1));
+                gPoints.Add(new GPoint(e.Point.Longitude, e.Point.Latitude, gPoints.Count + 1));
 
                 PointsConsole.Text += Environment.NewLine + e.Point.ToString();
-                CurrentPointTextBlock.Text = new GPoint(e.Point.Long, e.Point.Lat, 0).ToString();
+                CurrentPointTextBlock.Text = new GPoint(e.Point.Longitude, e.Point.Latitude, 0).ToString();
                 //ApplicationTitle.Text = e.Point.
             }
         }

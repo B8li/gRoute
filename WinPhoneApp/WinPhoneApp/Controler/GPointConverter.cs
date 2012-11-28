@@ -9,12 +9,19 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using System.Collections.Generic;
 
 namespace WinPhoneApp
 {
+    /// <summary>
+    /// Util class for diferent conversion of GPoing Data.
+    /// </summary>
     public class GPointConverter
     {
+        /// <summary>
+        /// Return's string made from list of coordinates(GPoing) that that can be imported in Windows Phone Simulator.
+        /// </summary>
+        /// <param name="points">List of GPoing elements that need's to be imported in WP Simulator.</param>
+        /// <returns>String that can be imported in Windows Phone Simulator.</returns>
         public static String FromGpointToWP7Simulator(List<GPoint> points)
         {
             String result = "";
@@ -32,8 +39,8 @@ namespace WinPhoneApp
             foreach (GPoint point in points)
 	        {
                 result +=Environment.NewLine + "\t\t\t";
-                result +="<GpsData longitude=\""+ point.Long.ToString().Replace(',','.')+"\" ";
-                result +="\t latitude=\""+point.Lat.ToString()+"\" />";
+                result +="<GpsData longitude=\""+ point.Longitude.ToString().Replace(',','.')+"\" ";
+                result +="\t latitude=\""+point.Latitude.ToString()+"\" />";
             }
 
             result += Environment.NewLine + "\t";
