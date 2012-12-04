@@ -10,13 +10,19 @@ using System.Windows.Shapes;
 
 namespace WPStartStopControl
 {
-    public partial class StopSpriteControl : UserControl
+    public partial class StopSpriteControl : UserControl,ISprite 
     {
         public StopSpriteControl()
         {
             // Required to initialize variables
             InitializeComponent();
             this.SizeChanged += new SizeChangedEventHandler(StopSpriteControl_SizeChanged);
+            this.Loaded += new RoutedEventHandler(StopSpriteControl_Loaded);
+        }
+
+        void StopSpriteControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            DrawUtils.StopBrush = this.StopSprite1.Fill;
         }
 
         void StopSpriteControl_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -36,7 +42,22 @@ namespace WPStartStopControl
             {
                 return this.StopSprite1.Fill;
             }
+            set
+            {
+                this.StopSprite1.Fill = value;
+                this.StopSprite2.Fill = value;
+            }
         }
-       
+
+
+        #region ISprite Members
+
+
+        public Visibility ControlVisibility()
+        {
+            return this.Visibility;
+        }
+
+        #endregion
     }
 }

@@ -34,5 +34,13 @@ namespace WPStartStopControl
                 groupTransform.Children.Add(rotate);
             }
         }
+        public static Brush GetGrayBrush()
+        {
+           return new SolidColorBrush(Colors.LightGray);
+           
+        }
+
+        public static Brush StartBrush;      
+        public static Brush StopBrush;
     }
 }

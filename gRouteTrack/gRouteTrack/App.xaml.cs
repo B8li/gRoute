@@ -12,13 +12,29 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
-
+using gRouteTrack.ViewModels;
+using gRouteTrack.Model;
+using System.IO.IsolatedStorage;
+using System.IO;
 namespace gRouteTrack
 {
     public partial class App : Application
     {
-        private static MainViewModel viewModel = null;
+        private static gSystemViewModel _gRouteTrackViewModel = null;
+        public static gSystemViewModel gRouteTrackViewModel
+        {
+            get
+            {
+                if (_gRouteTrackViewModel == null)
+                {
+                    _gRouteTrackViewModel = new gSystemViewModel();
+                }
 
+                return _gRouteTrackViewModel;
+            }
+        }
+
+        private static MainViewModel viewModel = null;
         /// <summary>
         /// A static ViewModel used by the views to bind against.
         /// </summary>
@@ -80,6 +96,7 @@ namespace gRouteTrack
         // This code will not execute when the application is reactivated
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
+            LoadFromIsolatedStorage("CurrentRoute.xml");
         }
 
         // Code to execute when the application is activated (brought to foreground)
@@ -91,12 +108,22 @@ namespace gRouteTrack
             {
                 App.ViewModel.LoadData();
             }
+
+            if (e.IsApplicationInstancePreserved)
+            {
+                LoadFromStateObject();
+            }
+            else
+            {
+                LoadFromIsolatedStorage("CurrentRoute.xml");
+            }
         }
 
         // Code to execute when the application is deactivated (sent to background)
         // This code will not execute when the application is closing
         private void Application_Deactivated(object sender, DeactivatedEventArgs e)
         {
+            SaveToStateObject();
         }
 
         // Code to execute when the application is closing (eg, user hit Back)
@@ -161,5 +188,78 @@ namespace gRouteTrack
         }
 
         #endregion
+
+        private void SaveToStateObject()
+        {
+            IDictionary<string, object> stateStore = PhoneApplicationService.Current.State;
+
+            stateStore.Remove("CurrentRoute");
+            stateStore.Add("CurrentRoute", gRouteTrackViewModel.CurrentRoute);
+
+        }
+
+        public static void SaveToIsolatedStorage()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                using (IsolatedStorageFileStream fileStream = isf.CreateFile("CurrentRoute.xml"))
+                {
+                    StreamWriter writter = new StreamWriter(fileStream);
+                    writter.Write(GPointConverter.FromGRouteToIsolatedStorageFormat(gRouteTrackViewModel.CurrentRoute));
+                    writter.Close();
+                }
+            }
+        }
+
+        public static void LoadFromIsolatedStorage(String FileName)
+        {
+            String result = "";
+
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                if (isf.FileExists(FileName))
+                {
+                    try
+                    {
+                        using (IsolatedStorageFileStream stream = isf.OpenFile(FileName, FileMode.Open))
+                        {
+                            StreamReader reader = new StreamReader(stream);
+                            result = reader.ReadToEnd();
+                            reader.Close();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        result = "";
+                    }
+                }
+            }
+            if (!String.IsNullOrWhiteSpace(result))
+            {
+                GRoute currRoute;
+                GPointConverter.FromIsolatedStorageFormatToGRoute(result, out currRoute);
+
+                if (currRoute.Coordinates.Count > 0)
+                {
+                    gRouteTrackViewModel.CurrentRoute = currRoute;
+                    MessageBox.Show("Loaded from isolatedStorage");
+                }
+            }
+            App.DeleteFileFromIsolatedStorage(FileName);
+        }
+        private void LoadFromStateObject()
+        {
+            if (PhoneApplicationService.Current.State.ContainsKey("CurrentRoute"))
+            {
+                gRouteTrackViewModel.CurrentRoute = (GRoute)PhoneApplicationService.Current.State["CurrentRoute"];
+                MessageBox.Show("Loaded from State object");
+            }
+            gRouteTrackViewModel.LocationServiceStatus = gSystemSettings.GLocationServiceStatus.Paused;
+
+        }
+        private static void DeleteFileFromIsolatedStorage(String FileName)
+        {
+            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(FileName);
+        }
     }
 }

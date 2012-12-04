@@ -8,84 +8,271 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:WPC="clr-namespace:WPStartStopControl;assembly=WPStartStopControl"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768" 
+    xmlns:local="clr-namespace:gRouteTrack"
+    xmlns:viewModel="clr-namespace:gRouteTrack.ViewModels"
+    xmlns:charts="clr-namespace:AmCharts.Windows.QuickCharts;assembly=AmCharts.Windows.QuickCharts.WP"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="696" 
     d:DataContext="{d:DesignData SampleData/MainViewModelSampleData.xaml}"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="True">
+    
+    <phone:PhoneApplicationPage.Resources>
+        <local:StringFormatComverter  x:Key="stringFormat"/>
+        <local:SpeedConverter  x:Key="speedFormat"/>
+        <local:FullTimeConverter x:Key="fullTimeFormat" />
+        <local:StatusFormater  x:Key="statusFormat" />
+        <viewModel:gSystemViewModel  x:Key="gSystemViewModel"/>
+    </phone:PhoneApplicationPage.Resources>
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
+        <Grid.Resources>
+            <Storyboard x:Name="animateMyCircle">
+                <DoubleAnimation 
+                            Storyboard.TargetName="myCircleStart"
+                            Storyboard.TargetProperty="(MainControl.SetLine)"
+                            From="360" To="0" Duration="0:0:1.5"
+                            By="10"
+                            RepeatBehavior="Forever" 
+                             />
+            </Storyboard>
+        </Grid.Resources>
         <!--Pivot Control-->
         <controls:Pivot Title="gRouteTrack" SelectedIndex="1">
             <!--Pivot item one-->
             <controls:PivotItem Header="Settings">
-                <StackPanel>
-                    <StackPanel.Resources>
-                        <Storyboard x:Name="animateMyCircle">
-                            <DoubleAnimation 
-                            Storyboard.TargetName="myCircle"
-                            Storyboard.TargetProperty="(MainControl.SetLine)"
-                            From="360" To="0" Duration="0:0:3"
-                            By="10"
-                            RepeatBehavior="Forever" 
-                             />
-                        </Storyboard>
-                    </StackPanel.Resources>
-                    <WPC:MainControl x:Name="myCircle" Loaded="myCircle_Loaded" >
-                    </WPC:MainControl>
-                </StackPanel>
+                <TextBlock x:Name="Log" TextWrapping="Wrap"/>
             </controls:PivotItem>
  
             <!--Pivot item two-->
-            <controls:PivotItem Header="GPS"> 
-                <!--Triple line list no text wrapping-->
-                    <ListBox x:Name="SecondListBox" Margin="0,0,-12,0" ItemsSource="{Binding Items}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,0,0,17">
-                                    <TextBlock Text="{Binding LineOne}" TextWrapping="NoWrap" Margin="12,0,0,0" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
-                                    <TextBlock Text="{Binding LineThree}" TextWrapping="NoWrap" Margin="12,-6,0,0" Style="{StaticResource PhoneTextSubtleStyle}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+            <controls:PivotItem Header="Gps">
+                <!-- 
+                <controls:PivotItem.Header>  
+                    <Grid Width="350">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="GPS Grid" />
+                    </Grid>
+                    
+                </controls:PivotItem.Header
+                -->
+                
+                <StackPanel>
+                    <Grid ShowGridLines="False" Height="500" Margin="12,0,12,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" ShowGridLines="False" VerticalAlignment="Top">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Image Source="/Icons/Globus.png" Grid.Column="0" Grid.Row="0" VerticalAlignment="Top" Width="120" HorizontalAlignment="Left" />
+                            <StackPanel Grid.Row="0" Grid.Column="1">
+                                <TextBlock Text="{Binding Longitude, Converter={StaticResource stringFormat}, ConverterParameter='Lon: \{0:\.######}' }" TextWrapping="NoWrap" Style="{StaticResource PhoneTextLargeStyle}" />
+                                <TextBlock Text="{Binding Latitude, Converter={StaticResource stringFormat}, ConverterParameter='Lat: \{0:\.######}' }" TextWrapping="NoWrap" Style="{StaticResource PhoneTextLargeStyle}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Grid.Row="0" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="{Binding FullTime, Converter={StaticResource fullTimeFormat}}" 
+                                   TextWrapping="Wrap" 
+                                   Style="{StaticResource PhoneTextNormalStyle}" 
+                                   Grid.Row="1" Grid.Column="0" 
+                                   HorizontalAlignment="Right" />
+                            <Image Source="/Icons/Red_clock.png" 
+                                   Grid.Row="1"  Grid.Column="1" 
+                                   VerticalAlignment="Center"  Width="100" HorizontalAlignment="Left"   />
+
+                        </Grid>
+
+                        <Grid Grid.Row="1" Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />    
+                            </Grid.RowDefinitions>
+
+                            <Image Source="/Icons/Running_man.png" 
+                                   Grid.Row="0"  Grid.Column="0" 
+                                   VerticalAlignment="Center"  Width="100" HorizontalAlignment="Right"  />
+                            <TextBlock Text="{Binding Speed, Converter={StaticResource speedFormat},ConverterParameter='\{0:0\.## km\\h}'}" 
+                                   TextWrapping="Wrap" 
+                                   Style="{StaticResource PhoneTextLargeStyle}" 
+                                   Grid.Row="0" Grid.Column="1" 
+                                   VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Grid Grid.Row="2" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Image Source="/Icons/Altitude.png" 
+                                   Grid.Row="0"  Grid.Column="0" 
+                                   VerticalAlignment="Center"  Width="140" HorizontalAlignment="Right"  />
+                            
+                            <TextBlock Text="{Binding Altitude, Converter={StaticResource stringFormat},ConverterParameter='\{0:0\.## m}'}" 
+                                   TextWrapping="Wrap" 
+                                   Style="{StaticResource PhoneTextLargeStyle}" 
+                                   Grid.Row="0" Grid.Column="1" 
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Left" />
+                        </Grid>
+                        
+                        <!-- Controls -->
+                        <Grid Grid.Row="3" Grid.ColumnSpan="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <WPC:MainControl Grid.Column="0" x:Name="myCircleStart" Loaded="myCircleStart_Loaded" />
+                            <TextBlock Text="{Binding LocationServiceStatus, Converter={StaticResource statusFormat}}" 
+                                   TextWrapping="Wrap" 
+                                   Style="{StaticResource PhoneTextNormalStyle}" 
+                                   VerticalAlignment="Bottom"
+                                   HorizontalAlignment="Center"  />
+                        </Grid>
+                    </Grid>
+                </StackPanel>
             </controls:PivotItem>
 
             <!--Pivot item three-->
             <controls:PivotItem Header="Charts">
+                <StackPanel>
                
+                    <charts:SerialChart Width="400" Height="300" AxisForeground="White" PlotAreaBackground="Black" 
+                                        DataSource="{Binding PointItems}" CategoryValueMemberPath="PointNumber" LegendVisibility="Visible" MinimumCategoryGridStep="3" >
+                        <charts:SerialChart.Graphs>
+                            <charts:ColumnGraph Title="Long" ValueMemberPath="Longitude">
+                                <charts:ColumnGraph.Brush>
+                                    <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+                                        <GradientStop Color="#FFAFF8F8" Offset="0" />
+                                        <GradientStop Color="#FF078989" Offset="1" />
+                                    </LinearGradientBrush>
+                                </charts:ColumnGraph.Brush>
+                            </charts:ColumnGraph>
+                        </charts:SerialChart.Graphs>
+                    </charts:SerialChart>
+                    
+
+                    <!--<Border BorderThickness="4" Width="400" Height="200" >
+                        <Border.BorderBrush>
+                            <SolidColorBrush Color="DarkTurquoise" />
+                        </Border.BorderBrush>
+                        <charts:SerialChart Width="400" Height="200" AxisForeground="Red" PlotAreaBackground="Black" 
+                                            DataSource="{Binding PointItems}" CategoryValueMemberPath="PointNumber" LegendVisibility="Visible" MinimumCategoryGridStep="3" >
+                            <charts:SerialChart.Graphs>
+                                <charts:ColumnGraph Title="Alt" ValueMemberPath="SpeedKM" Brush="YellowGreen" />
+                            </charts:SerialChart.Graphs>
+                        </charts:SerialChart>
+                    </Border>-->
+                </StackPanel>
             </controls:PivotItem>
 
             <!--Pivot item four-->
             <controls:PivotItem Header="Data">
-                <!--Double line list with text wrapping-->
-                <ListBox x:Name="FirstListBox" Margin="0,0,-12,0" ItemsSource="{Binding Items}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="0,0,0,17" Width="432" Height="78">
-                                <TextBlock Text="{Binding LineOne}" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
-                                <TextBlock Text="{Binding LineTwo}" TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                <StackPanel>
+                    <ListBox x:Name="SecondListBox" Margin="12,0,12,0" ItemsSource="{Binding PointItems}" MaxHeight="500">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid x:Name="gDataGrid" Loaded="gDataGrid_Loaded" Margin="12,0,12,0" >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    
+                                    <StackPanel Orientation="Horizontal" Grid.Row="0">
+                                        <Image Source="/Icons/Globus.png" Width="20" />
+                                        <TextBlock Text="{Binding Longitude, Converter={StaticResource stringFormat}, ConverterParameter='Lon: \{0:\.######}' }"    
+                                                    TextWrapping="NoWrap" 
+                                                    Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        <TextBlock Text="{Binding Latitude, Converter={StaticResource stringFormat}, ConverterParameter='Lat: \{0:\.######}' }"   
+                                                    TextWrapping="NoWrap" 
+                                                    Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    </StackPanel>
+
+                                    <Grid ShowGridLines="False" Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="2*"/>
+                                        </Grid.ColumnDefinitions>
+                                       
+                                        <TextBlock Text="{Binding Altitude,   Converter={StaticResource stringFormat}, ConverterParameter='A:\{0:0\.## m}' }"  
+                                                    TextWrapping="NoWrap" 
+                                                    Style="{StaticResource PhoneTextSubtleStyle}" 
+                                                    Grid.Column="0"/>
+                                        <TextBlock Text="{Binding Speed, Converter={StaticResource speedFormat},ConverterParameter='S:\{0:0\.## km\\h}'}"      
+                                                    TextWrapping="NoWrap" 
+                                                    Style="{StaticResource PhoneTextSubtleStyle}" 
+                                                    Grid.Column="1"/>
+ 
+                                        <Grid Grid.Column="2">
+                                            <!-- appbar.time.rest.png -->
+                                            <Image Source="/Icons/red_clock.png" Width="30" HorizontalAlignment="Left" Margin="55,0,0,0"/>
+                                            <TextBlock  Text="{Binding TimeTaken,   Converter={StaticResource stringFormat}, ConverterParameter='\{0:HH:mm:ss}' }"  
+                                                        Grid.Column="2"
+                                                        TextWrapping="NoWrap" Style="{StaticResource PhoneTextSubtleStyle}" 
+                                                            VerticalAlignment="Center" Margin="95,0,0,0"/>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Border Grid.Row="2"  BorderThickness="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                                        <Border.BorderBrush>
+                                            <SolidColorBrush Color="YellowGreen" />
+                                        </Border.BorderBrush>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
             </controls:PivotItem>
         </controls:Pivot>
     </Grid>
  
     <!--Sample code showing usage of ApplicationBar-->
-    <!--<phone:PhoneApplicationPage.ApplicationBar>
+    <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Button 1"/>
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Button 2"/>
-            <shell:ApplicationBar.MenuItems>
+            <shell:ApplicationBarIconButton IconUri="/Icons/Email.png" Text="Email" Click="ApplicationBarIconButton_Click"/>
+            <!--<shell:ApplicationBar.MenuItems>
                 <shell:ApplicationBarMenuItem Text="MenuItem 1"/>
-                <shell:ApplicationBarMenuItem Text="MenuItem 2"/>
-            </shell:ApplicationBar.MenuItems>
+            </shell:ApplicationBar.MenuItems>-->
         </shell:ApplicationBar>
-    </phone:PhoneApplicationPage.ApplicationBar>-->
+    </phone:PhoneApplicationPage.ApplicationBar>
 
 </phone:PhoneApplicationPage>

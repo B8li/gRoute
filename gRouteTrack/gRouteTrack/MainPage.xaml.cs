@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
+using gRouteTrack.Model;
 
 namespace gRouteTrack
 {
@@ -20,12 +21,34 @@ namespace gRouteTrack
         {
             InitializeComponent();
 
-            // Set the data context of the listbox control to the sample data
-            DataContext = App.ViewModel;
+            this.DataContext = App.gRouteTrackViewModel;
             this.Loaded += new RoutedEventHandler(MainPage_Loaded);
 
-            myCircle.SetSize = 70;
-         
+            //Always first set SetSpaceBetween if you want to work
+            myCircleStart.SetSpaceBetween = 60;
+            myCircleStart.SetSize = 200;
+        }
+
+        protected override void OnNavigatedFrom(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+
+            if (!App.gRouteTrackViewModel.CurrentRoute.IsFinished)
+            {
+                App.SaveToIsolatedStorage();
+            }
+        }
+
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            //App.LoadFromIsolatedStorage();
+        }
+        private void gDataGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            Grid gridData = (Grid)sender;
+            gridData.Width = Application.Current.RootVisual.RenderSize.Width;
         }
 
         // Load data for the ViewModel Items
@@ -35,27 +58,70 @@ namespace gRouteTrack
             {
                 App.ViewModel.LoadData();
             }
+
+            /*
+            //TO-DO remove this lines - just for test
+            App.gRouteTrackViewModel.CurrentRoute.AddNewGPoint(new Model.GPoint(42.25632, 40.326, 1, new DateTimeOffset(DateTime.Now)),true);
+            App.gRouteTrackViewModel.CurrentRoute.AddNewGPoint(new Model.GPoint(43.25632, 41.305, 2, new DateTimeOffset(DateTime.Now)), true);
+              */
         }
 
-        private void myCircle_Loaded(object sender, RoutedEventArgs e)
+        private void myCircleStart_Loaded(object sender, RoutedEventArgs e)
         {
-            animateMyCircle.Begin();
-            myCircle.ShowStart();
-            myCircle.MouseLeftButtonDown += new MouseButtonEventHandler(myCircle_MouseLeftButtonDown);
+            myCircleStart.OnControlClick += new WPStartStopControl.MainControl.ControlClick(myCircleStart_OnControlClick);
+            myCircleStart.Status = WPStartStopControl.MainControl.GLocationServiceStatus.NotStarted;
+            myCircleStart_OnControlClick(null, WPStartStopControl.MainControl.ControlClicked.Stop);
         }
 
-        void myCircle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+
+        void myCircleStart_OnControlClick(object sender, WPStartStopControl.MainControl.ControlClicked e)
         {
-            if (myCircle.Started == true)
+            try
             {
-                myCircle.ShowStop();
-                animateMyCircle.Pause();
+                gSystemSettings.GLocationServiceStatus oldStatus = App.gRouteTrackViewModel.LocationServiceStatus;
+                if (e == WPStartStopControl.MainControl.ControlClicked.Start)
+                {
+                    myCircleStart.Status = (WPStartStopControl.MainControl.GLocationServiceStatus)App.gRouteTrackViewModel.ClickedStart();
+                }
+                else
+                {
+                    myCircleStart.Status = (WPStartStopControl.MainControl.GLocationServiceStatus)App.gRouteTrackViewModel.ClickedStop();
+                }
+                
+                
+                switch (myCircleStart.Status)
+                {
+                    case WPStartStopControl.MainControl.GLocationServiceStatus.Started:
+                        if (oldStatus == gSystemSettings.GLocationServiceStatus.Paused)
+                        {
+                            animateMyCircle.Resume();
+                        }
+                        else
+                        {
+                            animateMyCircle.Begin();
+                        }
+                        break;
+                    case WPStartStopControl.MainControl.GLocationServiceStatus.Paused:
+                        animateMyCircle.Pause();
+                        break;
+                    case WPStartStopControl.MainControl.GLocationServiceStatus.Stopped:
+                    case WPStartStopControl.MainControl.GLocationServiceStatus.NotStarted:
+                        animateMyCircle.Pause();
+                        break;
+                    default:
+                        break;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                myCircle.ShowStart();
-                animateMyCircle.Resume();
+
+                MessageBox.Show(ex.Message);
             }
+        }
+
+        private void ApplicationBarIconButton_Click(object sender, EventArgs e)
+        {
+            Tasks.ComposeEmail("igor.bulovski@gmail.com", "[WP]", GPointConverter.FromGRouteToIsolatedStorageFormat(App.gRouteTrackViewModel.CurrentRoute), "");
         }
     }
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>amChartsQuickCharts</id>
+    <version>1.1</version>
+    <title>amCharts Quick Charts for WPF, Silverlight and Windows Phone</title>
+    <authors>Alan Mendelevich</authors>
+    <owners>Alan Mendelevich</owners>
+    <licenseUrl>http://www.opensource.org/licenses/ms-pl</licenseUrl>
+    <projectUrl>http://wpf.amcharts.com/quick</projectUrl>
+    <iconUrl>https://nugetgallery.blob.core.windows.net/icons/amChartsQuickCharts.1.1.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Easy to use, fast, lightweight charting controls for WPF, Silverlight and Windows Phone 7. Supports line, column, area and pie charts.</description>
+    <summary>Easy to use, fast, lightweight charting controls for WPF, Silverlight and Windows Phone 7.</summary>
+    <tags>WPF Silverlight WP7 wp7dev WindowsPhone charts charting</tags>
+  </metadata>
+</package>

@@ -10,20 +10,31 @@ using System.Windows.Shapes;
 
 namespace WPStartStopControl
 {
-	public partial class StartSpriteControl : UserControl
-	{
-		public StartSpriteControl()
-		{
-			// Required to initialize variables
-			InitializeComponent();
-			this.SizeChanged+=new System.Windows.SizeChangedEventHandler(StartSpriteControl_SizeChanged);
-		}
+    public partial class StartSpriteControl : UserControl, ISprite
+    {
+        public StartSpriteControl()
+        {
+            // Required to initialize variables
+            InitializeComponent();
+            this.SizeChanged += new System.Windows.SizeChangedEventHandler(StartSpriteControl_SizeChanged);
+            this.Loaded += new RoutedEventHandler(StartSpriteControl_Loaded);
+        }
+
+        void StartSpriteControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            DrawUtils.StartBrush = this.Sprite1.Fill;
+        }
 
         public Brush Fill
         {
             get
             {
                 return this.Sprite1.Fill;
+            }
+            set
+            {
+                this.Sprite1.Fill = value;
+                this.Sprite2.Fill = value;
             }
         }
 
@@ -34,7 +45,7 @@ namespace WPStartStopControl
 
 
             TranslateTransform translate = new TranslateTransform();
-            translate.X = (Sprite1.ActualWidth - Sprite1.Margin.Left - Sprite1.Margin.Right) /1.17;
+            translate.X = (Sprite1.ActualWidth - Sprite1.Margin.Left - Sprite1.Margin.Right) / 1.17;
             sprite1Transform.Children.Add(translate);
 
             Sprite1.RenderTransform = sprite1Transform;
@@ -44,11 +55,21 @@ namespace WPStartStopControl
             DrawUtils.DrawSprite(Sprite2, 0.14, 0.3, e.NewSize.Width, 125, sprite2Transform);
             TranslateTransform translate2 = new TranslateTransform();
             translate2.X = -(Sprite2.ActualWidth - Sprite2.Margin.Left - Sprite2.Margin.Right) / 1.1;
-            translate2.Y =(Sprite2.ActualHeight - Sprite2.Margin.Top - Sprite2.Margin.Bottom) / 2.8;
+            translate2.Y = (Sprite2.ActualHeight - Sprite2.Margin.Top - Sprite2.Margin.Bottom) / 2.8;
             sprite2Transform.Children.Add(translate2);
 
             Sprite2.RenderTransform = sprite2Transform;
             //Sprite2.Visibility = System.Windows.Visibility.Collapsed;
         }
-	}
+
+        #region ISprite Members
+
+
+        public Visibility ControlVisibility()
+        {
+            return this.Visibility;
+        }
+
+        #endregion
+    }
 }
