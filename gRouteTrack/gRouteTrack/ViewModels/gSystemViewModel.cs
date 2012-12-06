@@ -61,6 +61,11 @@ namespace gRouteTrack.ViewModels
             {
                 return this._routesOnPhone;
             }
+
+            set
+            {
+                this._routesOnPhone = value;
+            }
         }
         public TimeSpan FullTime
         {

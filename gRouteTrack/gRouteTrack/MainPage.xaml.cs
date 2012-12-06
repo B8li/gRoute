@@ -32,18 +32,12 @@ namespace gRouteTrack
         protected override void OnNavigatedFrom(System.Windows.Navigation.NavigationEventArgs e)
         {
             base.OnNavigatedFrom(e);
-
-            if (!App.gRouteTrackViewModel.CurrentRoute.IsFinished)
-            {
-                App.SaveToIsolatedStorage();
-            }
+            App.SaveToIsolatedStorage();
         }
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-
-            //App.LoadFromIsolatedStorage();
         }
         private void gDataGrid_Loaded(object sender, RoutedEventArgs e)
         {

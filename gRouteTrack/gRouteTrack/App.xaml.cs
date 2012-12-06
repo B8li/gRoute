@@ -16,6 +16,7 @@ using gRouteTrack.ViewModels;
 using gRouteTrack.Model;
 using System.IO.IsolatedStorage;
 using System.IO;
+using System.Collections.ObjectModel;
 namespace gRouteTrack
 {
     public partial class App : Application
@@ -96,7 +97,7 @@ namespace gRouteTrack
         // This code will not execute when the application is reactivated
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
-            LoadFromIsolatedStorage("CurrentRoute.xml");
+            LoadFromIsolatedStorage();
         }
 
         // Code to execute when the application is activated (brought to foreground)
@@ -115,7 +116,7 @@ namespace gRouteTrack
             }
             else
             {
-                LoadFromIsolatedStorage("CurrentRoute.xml");
+                LoadFromIsolatedStorage();
             }
         }
 
@@ -189,6 +190,62 @@ namespace gRouteTrack
 
         #endregion
 
+        
+
+        public static void SaveToIsolatedStorage()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                if (!gRouteTrackViewModel.CurrentRoute.IsFinished)
+                {
+                    using (IsolatedStorageFileStream fileStream = isf.CreateFile("CurrentRoute.xml"))
+                    {
+                        StreamWriter writter = new StreamWriter(fileStream);
+                        writter.Write(GPointConverter.FromGRouteToIsolatedStorageFormat(gRouteTrackViewModel.CurrentRoute));
+                        writter.Close();
+                    }
+                }
+
+                using (IsolatedStorageFileStream fileStream = isf.CreateFile("Routes.xml"))
+                {
+                    StreamWriter writter = new StreamWriter(fileStream);
+                    writter.Write(GPointConverter.FromGRoutesToIsolatedStorageFormat(gRouteTrackViewModel.RoutesOnPhone.ToList<GRoute>()));
+                    writter.Close();
+                }
+            }
+        }
+        public static void LoadFromIsolatedStorage()
+        {
+            String result = "";
+            result = App.LoadStringFromIsolatedStorage("CurrentRoute.xml");
+            if (!String.IsNullOrWhiteSpace(result))
+            {
+                GRoute currRoute;
+                GPointConverter.FromIsolatedStorageFormatToGRoute(result, out currRoute);
+
+                if (currRoute.Coordinates.Count > 0)
+                {
+                    gRouteTrackViewModel.CurrentRoute = currRoute;
+                    MessageBox.Show("Loaded CurrentRoute from isolatedStorage"); //TO-DO Log File
+                }
+            }
+            App.DeleteFileFromIsolatedStorage("CurrentRoute.xml");
+
+            result = App.LoadStringFromIsolatedStorage("Routes.xml");
+            if (!String.IsNullOrWhiteSpace(result))
+            {
+                List<GRoute> routes = new List<GRoute>();
+                GPointConverter.FromIsolatedStorageFormatToGRoutes(result, out routes);
+
+                if (routes.Count > 0)
+                {
+                    gRouteTrackViewModel.RoutesOnPhone = new ObservableCollection<GRoute>(routes);
+                    MessageBox.Show("Loaded Routes from isolatedStorage"); //TO-DO Log File
+                }
+            }
+            App.DeleteFileFromIsolatedStorage("Routes.xml");
+        }
+
         private void SaveToStateObject()
         {
             IDictionary<string, object> stateStore = PhoneApplicationService.Current.State;
@@ -196,22 +253,10 @@ namespace gRouteTrack
             stateStore.Remove("CurrentRoute");
             stateStore.Add("CurrentRoute", gRouteTrackViewModel.CurrentRoute);
 
+            stateStore.Remove("Routes");
+            stateStore.Add("Routes", gRouteTrackViewModel.RoutesOnPhone.ToList<GRoute>());
         }
-
-        public static void SaveToIsolatedStorage()
-        {
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                using (IsolatedStorageFileStream fileStream = isf.CreateFile("CurrentRoute.xml"))
-                {
-                    StreamWriter writter = new StreamWriter(fileStream);
-                    writter.Write(GPointConverter.FromGRouteToIsolatedStorageFormat(gRouteTrackViewModel.CurrentRoute));
-                    writter.Close();
-                }
-            }
-        }
-
-        public static void LoadFromIsolatedStorage(String FileName)
+        private static String LoadStringFromIsolatedStorage(String FileName)
         {
             String result = "";
 
@@ -234,26 +279,22 @@ namespace gRouteTrack
                     }
                 }
             }
-            if (!String.IsNullOrWhiteSpace(result))
-            {
-                GRoute currRoute;
-                GPointConverter.FromIsolatedStorageFormatToGRoute(result, out currRoute);
-
-                if (currRoute.Coordinates.Count > 0)
-                {
-                    gRouteTrackViewModel.CurrentRoute = currRoute;
-                    MessageBox.Show("Loaded from isolatedStorage");
-                }
-            }
-            App.DeleteFileFromIsolatedStorage(FileName);
+            return result;
         }
-        private void LoadFromStateObject()
+        private static void LoadFromStateObject()
         {
             if (PhoneApplicationService.Current.State.ContainsKey("CurrentRoute"))
             {
                 gRouteTrackViewModel.CurrentRoute = (GRoute)PhoneApplicationService.Current.State["CurrentRoute"];
-                MessageBox.Show("Loaded from State object");
+                MessageBox.Show("Loaded CurrentRoute from State object"); //TO-DO Log File
             }
+
+            if (PhoneApplicationService.Current.State.ContainsKey("Routes"))
+            {
+                gRouteTrackViewModel.RoutesOnPhone = new ObservableCollection<GRoute>((List<GRoute>)PhoneApplicationService.Current.State["Routes"]);
+                MessageBox.Show("Loaded Routes from State object"); //TO-DO Log File
+            }
+
             gRouteTrackViewModel.LocationServiceStatus = gSystemSettings.GLocationServiceStatus.Paused;
 
         }
