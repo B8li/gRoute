@@ -23,7 +23,7 @@ namespace gRouteTrack.ViewModels
         private gSystemSettings.GLocationServiceStatus _cuurentStatus;
 
         private DispatcherTimer _elasptedTimeTimer;
-
+        private ObservableCollection<GRoute> _routesOnPhone;
 
         #endregion
 
@@ -39,6 +39,7 @@ namespace gRouteTrack.ViewModels
             this._currentRoute = new GRoute();
             this._locationService.OnNewGPoint += new GLocationService.NewGPoint(_locationService_OnNewGPoint);
             this._cuurentStatus = this._locationService.LocationServiceStatus;
+            this._routesOnPhone = new ObservableCollection<GRoute>();
         }
 
 
@@ -54,6 +55,13 @@ namespace gRouteTrack.ViewModels
             }
         }
 
+        public ObservableCollection<GRoute> RoutesOnPhone
+        {
+            get
+            {
+                return this._routesOnPhone;
+            }
+        }
         public TimeSpan FullTime
         {
             get
@@ -189,6 +197,114 @@ namespace gRouteTrack.ViewModels
                 this.LocationServiceStatus = this._locationService.StartGLocationWithEvent();
             }
         }
+
+        public gSystemSettings.GLocationServiceStatus ClickedStart()
+        {
+            if (this.CurrentRoute.IsFinished)
+            {
+                ResolveFinifshedRoute();
+                return gSystemSettings.GLocationServiceStatus.NotStarted;
+            }
+            gSystemSettings.GLocationServiceStatus newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
+            switch (this.LocationServiceStatus)
+            {
+                case gSystemSettings.GLocationServiceStatus.NotStarted:
+                    this.Start();
+                    newStatus = gSystemSettings.GLocationServiceStatus.Started;
+                    break;
+                case gSystemSettings.GLocationServiceStatus.Started:
+                    this.Pause();
+                    newStatus = gSystemSettings.GLocationServiceStatus.Paused;
+                    break;
+                case gSystemSettings.GLocationServiceStatus.Paused:
+                    this.Start();
+                    newStatus = gSystemSettings.GLocationServiceStatus.Started;
+                    break;
+                default:
+                    newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
+                    break;
+            }
+
+            //Just for test 
+            //newStatus = gSystemSettings.GLocationServiceStatus.NotStarted;
+            return newStatus;
+        }
+
+        public gSystemSettings.GLocationServiceStatus ClickedStop()
+        {
+            gSystemSettings.GLocationServiceStatus newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
+            switch (this.LocationServiceStatus)
+            {
+                case gSystemSettings.GLocationServiceStatus.NotStarted:
+                    newStatus = gSystemSettings.GLocationServiceStatus.NotStarted;
+                    break;
+                case gSystemSettings.GLocationServiceStatus.Started:
+                    this.Pause();
+                    newStatus = gSystemSettings.GLocationServiceStatus.Paused;
+                    break;
+                case gSystemSettings.GLocationServiceStatus.Paused:
+                    this.Stop();
+                    this.CurrentRoute.StopRoute();
+                    ResolveFinifshedRoute();
+                    newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
+                    break;
+                default:
+                    newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
+                    break;
+            }
+
+            return newStatus;
+        }
+
+        public gSystemSettings.GLocationServiceStatus ClickedDelete()
+        {
+            switch (LocationServiceStatus)
+            {
+                case gSystemSettings.GLocationServiceStatus.NotStarted:
+                case gSystemSettings.GLocationServiceStatus.Stopped:
+                    if (MessageBox.Show("Do you want to delete current route?", "Route is stopped.", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+                    {
+                        DeleteCurrentRoute();
+                    }
+                    break;
+                case gSystemSettings.GLocationServiceStatus.Paused:
+                case gSystemSettings.GLocationServiceStatus.Started:
+                    if (MessageBox.Show("Do you want to stop and delete current route?", "Route is active.", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+                    {
+                        DeleteCurrentRoute();
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            return this.LocationServiceStatus;
+        }
+        public void ResolveFinifshedRoute()
+        {
+            MessageBoxResult result = MessageBoxResult.Cancel;
+            if (this.CurrentRoute.UploadCheck == false)
+            {
+                result = MessageBox.Show("Do you want to upload current route?", "Route is finished.", MessageBoxButton.OKCancel);
+                this.CurrentRoute.UploadCheck = true;
+            }
+            else
+            {
+                MessageBox.Show("", "Route is finished.", MessageBoxButton.OK);
+                result = MessageBoxResult.Cancel;
+            }
+
+            if (result == MessageBoxResult.OK)
+            {
+                //TO-DO Upload route here
+            }
+            else
+            {
+                SaveCurrentRoute();
+            }
+
+            DeleteCurrentRoute();
+        }
         #endregion
 
         #region PrivateFunctions
@@ -222,85 +338,20 @@ namespace gRouteTrack.ViewModels
             }
         }
 
-        public gSystemSettings.GLocationServiceStatus ClickedStart()
+        private void DeleteCurrentRoute()
         {
-            if (this.CurrentRoute.IsFinished)
-            {
-                ResolveFinifshedRoute();
-                return gSystemSettings.GLocationServiceStatus.NotStarted;
-            }
-            gSystemSettings.GLocationServiceStatus newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
-            switch (this.LocationServiceStatus)
-            {
-                case gSystemSettings.GLocationServiceStatus.NotStarted:
-                    this.Start();
-                    newStatus = gSystemSettings.GLocationServiceStatus.Started;
-                    break;
-                case gSystemSettings.GLocationServiceStatus.Started:
-                    this.Pause();
-                    newStatus = gSystemSettings.GLocationServiceStatus.Paused;
-                    break;
-                case gSystemSettings.GLocationServiceStatus.Paused:
-                    this.Start();
-                    newStatus = gSystemSettings.GLocationServiceStatus.Started;
-                    break;
-                default:
-                    newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
-                    break;
-            }
-
-            return newStatus;
-        }
-
-        public gSystemSettings.GLocationServiceStatus ClickedStop()
-        {
-            gSystemSettings.GLocationServiceStatus newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
-            switch (this.LocationServiceStatus)
-            {
-                case gSystemSettings.GLocationServiceStatus.NotStarted:
-                    newStatus = gSystemSettings.GLocationServiceStatus.NotStarted;
-                    break;
-                case gSystemSettings.GLocationServiceStatus.Started:
-                    this.Pause();
-                    newStatus = gSystemSettings.GLocationServiceStatus.Paused;
-                    break;
-                case gSystemSettings.GLocationServiceStatus.Paused:
-                    this.Stop();
-                    this.CurrentRoute.StopRoute();
-                    ResolveFinifshedRoute();
-                    newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
-                    break;
-                default:
-                    newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
-                    break;
-            }
-
-            return newStatus;
-        }
-
-        public void ResolveFinifshedRoute()
-        {
-            MessageBoxResult result = MessageBoxResult.Cancel;
-            if (this.CurrentRoute.UploadCheck == false)
-            {
-                result = MessageBox.Show("Do you want to upload current route?", "Route is finished.", MessageBoxButton.OKCancel);
-                this.CurrentRoute.UploadCheck = true;
-            }
-            else
-            {
-                MessageBox.Show("", "Route is finished.", MessageBoxButton.OK);
-                result = MessageBoxResult.Cancel;
-            }
-
-            if (result == MessageBoxResult.OK)
-            {
-                //TO-DO try to upload route
-            }
-
+            this.Stop();// Just to be sure that GPS Sensor  is stopped
             this._currentRoute = new GRoute();
             this.LocationServiceStatus = gSystemSettings.GLocationServiceStatus.NotStarted;
             RefreshRouteProperties();
             RaisePropertyChanged("PointItems"); //Used to refresh data grid
+        }
+
+        private void SaveCurrentRoute()
+        {
+            this.Stop(); // Just to be sure that GPS Sensor  is stopped
+            this.RoutesOnPhone.Add(this.CurrentRoute);
+            RaisePropertyChanged("RoutesOnPhone");
         }
         #endregion
     }

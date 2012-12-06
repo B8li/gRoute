@@ -48,7 +48,7 @@ namespace gRouteTrack
         private void gDataGrid_Loaded(object sender, RoutedEventArgs e)
         {
             Grid gridData = (Grid)sender;
-            gridData.Width = Application.Current.RootVisual.RenderSize.Width;
+            //gridData.Width = Application.Current.RootVisual.RenderSize.Width;
         }
 
         // Load data for the ViewModel Items
@@ -87,30 +87,7 @@ namespace gRouteTrack
                 {
                     myCircleStart.Status = (WPStartStopControl.MainControl.GLocationServiceStatus)App.gRouteTrackViewModel.ClickedStop();
                 }
-                
-                
-                switch (myCircleStart.Status)
-                {
-                    case WPStartStopControl.MainControl.GLocationServiceStatus.Started:
-                        if (oldStatus == gSystemSettings.GLocationServiceStatus.Paused)
-                        {
-                            animateMyCircle.Resume();
-                        }
-                        else
-                        {
-                            animateMyCircle.Begin();
-                        }
-                        break;
-                    case WPStartStopControl.MainControl.GLocationServiceStatus.Paused:
-                        animateMyCircle.Pause();
-                        break;
-                    case WPStartStopControl.MainControl.GLocationServiceStatus.Stopped:
-                    case WPStartStopControl.MainControl.GLocationServiceStatus.NotStarted:
-                        animateMyCircle.Pause();
-                        break;
-                    default:
-                        break;
-                }
+                ChangeMyControlStatus(oldStatus);
             }
             catch (Exception ex)
             {
@@ -119,9 +96,42 @@ namespace gRouteTrack
             }
         }
 
-        private void ApplicationBarIconButton_Click(object sender, EventArgs e)
+        private void Email_Icon_Click(object sender, EventArgs e)
         {
             Tasks.ComposeEmail("igor.bulovski@gmail.com", "[WP]", GPointConverter.FromGRouteToIsolatedStorageFormat(App.gRouteTrackViewModel.CurrentRoute), "");
+        }
+
+        private void Delete_Icon_Click(object sender, EventArgs e)
+        {
+            gSystemSettings.GLocationServiceStatus oldStatus = App.gRouteTrackViewModel.LocationServiceStatus;
+            myCircleStart.Status = (WPStartStopControl.MainControl.GLocationServiceStatus) App.gRouteTrackViewModel.ClickedDelete();
+            ChangeMyControlStatus(oldStatus);
+        }
+
+        private void ChangeMyControlStatus(gSystemSettings.GLocationServiceStatus oldStatus)
+        {
+            switch (myCircleStart.Status)
+            {
+                case WPStartStopControl.MainControl.GLocationServiceStatus.Started:
+                    if (oldStatus == gSystemSettings.GLocationServiceStatus.Paused)
+                    {
+                        animateMyCircle.Resume();
+                    }
+                    else
+                    {
+                        animateMyCircle.Begin();
+                    }
+                    break;
+                case WPStartStopControl.MainControl.GLocationServiceStatus.Paused:
+                    animateMyCircle.Pause();
+                    break;
+                case WPStartStopControl.MainControl.GLocationServiceStatus.Stopped:
+                case WPStartStopControl.MainControl.GLocationServiceStatus.NotStarted:
+                    animateMyCircle.Pause();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

@@ -115,6 +115,7 @@
     </Content>
     <Content Include="Icons\Altitude.png" />
     <Content Include="Icons\appbar.time.rest.png" />
+    <Content Include="Icons\Delete.png" />
     <Content Include="Icons\Email.png" />
     <Content Include="Icons\Globus.png" />
     <Content Include="Icons\Red_clock.png" />

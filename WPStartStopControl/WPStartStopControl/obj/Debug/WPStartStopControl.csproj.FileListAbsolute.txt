@@ -1,0 +1,13 @@
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\Bin\Debug\WPStartStopControl.dll
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\Bin\Debug\WPStartStopControl.pdb
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\Bin\Debug\Microsoft.Expression.Controls.dll
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\Bin\Debug\Microsoft.Expression.Drawing.dll
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\Bin\Debug\Microsoft.Expression.Controls.xml
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\Bin\Debug\Microsoft.Expression.Drawing.xml
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\obj\Debug\ResolveAssemblyReference.cache
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\obj\Debug\MainControl.g.i.cs
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\obj\Debug\StartSpriteControl.g.i.cs
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\obj\Debug\StopSpriteControl.g.i.cs
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\obj\Debug\WPStartStopControl.g.resources
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\obj\Debug\WPStartStopControl.dll
+D:\GitHub\gRoute\WPStartStopControl\WPStartStopControl\obj\Debug\WPStartStopControl.pdb
