@@ -12,7 +12,6 @@
     xmlns:viewModel="clr-namespace:gRouteTrack.ViewModels"
     xmlns:charts="clr-namespace:AmCharts.Windows.QuickCharts;assembly=AmCharts.Windows.QuickCharts.WP"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="696" 
-    d:DataContext="{d:DesignData SampleData/MainViewModelSampleData.xaml}"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
@@ -41,10 +40,34 @@
             </Storyboard>
         </Grid.Resources>
         <!--Pivot Control-->
-        <controls:Pivot Title="gRouteTrack" SelectedIndex="1">
+        <controls:Pivot Title="gRouteTrack" SelectedIndex="1" SelectionChanged="Pivot_SelectionChanged" x:Name="MainPivot">
             <!--Pivot item one-->
-            <controls:PivotItem Header="Settings">
-                <TextBlock x:Name="Log" TextWrapping="Wrap"/>
+            <controls:PivotItem x:Name="SettingsPivotItem" Header="Settings" Loaded="PivotItem_Loaded">
+                <StackPanel>
+                    <TextBlock>Distance in meters to ignore:</TextBlock>
+                    <Slider x:Name="SliderDistanceMeters" Minimum="0" Maximum="50"  Value="{Binding DistanceInMeters,Mode=TwoWay}"/>
+                    <Grid ShowGridLines="False" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Grid.Row="0">User Name:</TextBlock>
+                        <TextBox x:Name="UserNameTextBox" Grid.Column="1" Grid.Row="0" Text="{Binding UserName,Mode=OneWay}"/>
+                        
+                        <TextBlock Grid.Column="0" Grid.Row="2">Password:</TextBlock>
+                        <StackPanel Grid.Column="1" Grid.Row="2">    
+                            <PasswordBox x:Name="PasswordBox" Password="{Binding Password,Mode=OneWay}"/>
+                            <Button x:Name="SaveButton" Content="Save" Width="120" Click="SaveButton_Click"/>
+                        </StackPanel>
+                    </Grid>
+                    <Image x:Name="TestImage"/>
+                    
+                </StackPanel>
             </controls:PivotItem>
  
             <!--Pivot item two-->
@@ -168,11 +191,43 @@
             <!--Pivot item three-->
             <controls:PivotItem Header="Charts">
                 <StackPanel>
-               
-                    <charts:SerialChart Width="400" Height="300" AxisForeground="White" PlotAreaBackground="Black" 
-                                        DataSource="{Binding PointItems}" CategoryValueMemberPath="PointNumber" LegendVisibility="Visible" MinimumCategoryGridStep="3" >
+                    <Border BorderThickness="4" Width="400" Height="200" >
+                        <Border.BorderBrush>
+                            <SolidColorBrush Color="DarkTurquoise" />
+                        </Border.BorderBrush>
+                        <charts:SerialChart x:Name="speedChart"
+                                            Width="400" 
+                                            Height="200" 
+                                            AxisForeground="Red" 
+                                            PlotAreaBackground="Black" 
+                                            DataSource="{Binding PointItems}" 
+                                            CategoryValueMemberPath="PointNumber" 
+                                            LegendVisibility="Visible" 
+                                            MinimumCategoryGridStep="3" >
+                            <charts:SerialChart.Graphs>
+                                <charts:ColumnGraph Title="Speed" ValueMemberPath="Logitude">
+                                    <charts:ColumnGraph.Brush>
+                                        <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+                                            <GradientStop Color="#FFAFF8F8" Offset="0" />
+                                            <GradientStop Color="#FF078989" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </charts:ColumnGraph.Brush>
+                                </charts:ColumnGraph>
+                            </charts:SerialChart.Graphs>
+                        </charts:SerialChart>
+                    </Border>
+                    
+                    <charts:SerialChart x:Name="altitudeChart"
+                                        Width="400" 
+                                        Height="300" 
+                                        AxisForeground="White" 
+                                        PlotAreaBackground="Black" 
+                                        DataSource="{Binding PointItems}" 
+                                        CategoryValueMemberPath="PointNumber" 
+                                        LegendVisibility="Visible" 
+                                        MinimumCategoryGridStep="3" >
                         <charts:SerialChart.Graphs>
-                            <charts:ColumnGraph Title="Long" ValueMemberPath="Longitude">
+                            <charts:ColumnGraph Title="Altitude" ValueMemberPath="Latitude">
                                 <charts:ColumnGraph.Brush>
                                     <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
                                         <GradientStop Color="#FFAFF8F8" Offset="0" />
@@ -182,26 +237,14 @@
                             </charts:ColumnGraph>
                         </charts:SerialChart.Graphs>
                     </charts:SerialChart>
-                    
-
-                    <!--<Border BorderThickness="4" Width="400" Height="200" >
-                        <Border.BorderBrush>
-                            <SolidColorBrush Color="DarkTurquoise" />
-                        </Border.BorderBrush>
-                        <charts:SerialChart Width="400" Height="200" AxisForeground="Red" PlotAreaBackground="Black" 
-                                            DataSource="{Binding PointItems}" CategoryValueMemberPath="PointNumber" LegendVisibility="Visible" MinimumCategoryGridStep="3" >
-                            <charts:SerialChart.Graphs>
-                                <charts:ColumnGraph Title="Alt" ValueMemberPath="SpeedKM" Brush="YellowGreen" />
-                            </charts:SerialChart.Graphs>
-                        </charts:SerialChart>
-                    </Border>-->
+                  
                 </StackPanel>
             </controls:PivotItem>
 
             <!--Pivot item four-->
             <controls:PivotItem Header="Data">
                 <StackPanel>
-                    <ListBox x:Name="SecondListBox" Margin="12,0,12,0" ItemsSource="{Binding PointItems}" MaxHeight="500">
+                    <ListBox x:Name="pointsListBox" Margin="12,0,12,0" ItemsSource="{Binding PointItems}" MaxHeight="500">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid x:Name="gDataGrid" Loaded="gDataGrid_Loaded" Margin="12,0,12,0" >
@@ -269,7 +312,7 @@
                     <ListBox x:Name="RoutesListBox" Margin="12,0,12,0" ItemsSource="{Binding RoutesOnPhone}" MaxHeight="500">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid x:Name="gRoutesGrid" Margin="12,0,12,0" >
+                                <Grid x:Name="gRoutesGrid" Margin="12,0,12,0" Loaded="gDataGrid_Loaded">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
@@ -281,40 +324,40 @@
 
 
                                     <StackPanel Orientation="Horizontal" Grid.Row="0">
-                                        <Image Source="/Icons/Globus.png" Width="20" />
-                                        <TextBlock Text="{Binding StartTime}"    
+                                        <Image Source="/Icons/Date.png" Width="35" />
+                                        <TextBlock Text="{Binding StartTime, Converter={StaticResource stringFormat}, ConverterParameter='\{0:yyyy-MM-dd HH:mm:ss}'}"    
                                                     TextWrapping="NoWrap" 
                                                     Style="{StaticResource PhoneTextSubtleStyle}" />
-                                        <TextBlock Text="{Binding EndTime}"   
+                                        <TextBlock Text="{Binding EndTime, Converter={StaticResource stringFormat}, ConverterParameter='\{0:yyyy-MM-dd HH:mm:ss}'}"   
                                                     TextWrapping="NoWrap" 
                                                     Style="{StaticResource PhoneTextSubtleStyle}" />
                                     </StackPanel>
-                                    <!--
+                                    
                                     <Grid ShowGridLines="False" Grid.Row="1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="1*"/>
                                             <ColumnDefinition Width="1*"/>
-                                            <ColumnDefinition Width="2*"/>
+                                            <ColumnDefinition Width="1*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock Text="{Binding Altitude,   Converter={StaticResource stringFormat}, ConverterParameter='A:\{0:0\.## m}' }"  
-                                                    TextWrapping="NoWrap" 
-                                                    Style="{StaticResource PhoneTextSubtleStyle}" 
-                                                    Grid.Column="0"/>
-                                        <TextBlock Text="{Binding Speed, Converter={StaticResource speedFormat},ConverterParameter='S:\{0:0\.## km\\h}'}"      
+                                        <Grid Grid.Column="0">
+                                            <Image Source="/Icons/red_clock.png" Width="30" HorizontalAlignment="Left" Margin="0,0,0,0"/>
+                                            <TextBlock  Text="{Binding FullTime,   Converter={StaticResource stringFormat}, ConverterParameter='\{0:HH:mm:ss}' }"  
+                                                        Grid.Column="2"
+                                                        TextWrapping="NoWrap" Style="{StaticResource PhoneTextSubtleStyle}" 
+                                                            VerticalAlignment="Center" Margin="40,0,0,0"/>
+                                        </Grid>
+                                        
+                                        <TextBlock Text="{Binding TotalDistance,   Converter={StaticResource stringFormat}, ConverterParameter='\{0:0\.## meters}' }"  
                                                     TextWrapping="NoWrap" 
                                                     Style="{StaticResource PhoneTextSubtleStyle}" 
                                                     Grid.Column="1"/>
-
-                                        <Grid Grid.Column="2">
-                                            <Image Source="/Icons/red_clock.png" Width="30" HorizontalAlignment="Left" Margin="55,0,0,0"/>
-                                            <TextBlock  Text="{Binding TimeTaken,   Converter={StaticResource stringFormat}, ConverterParameter='\{0:HH:mm:ss}' }"  
-                                                        Grid.Column="2"
-                                                        TextWrapping="NoWrap" Style="{StaticResource PhoneTextSubtleStyle}" 
-                                                            VerticalAlignment="Center" Margin="95,0,0,0"/>
-                                        </Grid>
+                                        <TextBlock Text="{Binding Speed, Converter={StaticResource speedFormat},ConverterParameter='S:\{0:0\.## km\\h}'}"      
+                                                    TextWrapping="NoWrap" 
+                                                    Style="{StaticResource PhoneTextSubtleStyle}" 
+                                                    Grid.Column="2"/>
                                     </Grid>
-                                    -->
+                                    
                                     <Border Grid.Row="2"  BorderThickness="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
                                         <Border.BorderBrush>
                                             <SolidColorBrush Color="CornflowerBlue" />
@@ -326,15 +369,15 @@
                     </ListBox>
                 </StackPanel>
             </controls:PivotItem>
-
         </controls:Pivot>
     </Grid>
  
     <!--Sample code showing usage of ApplicationBar-->
     <phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True"  x:Name="GpsBar">
             <shell:ApplicationBarIconButton IconUri="/Icons/Email.png" Text="Email" Click="Email_Icon_Click"/>
             <shell:ApplicationBarIconButton IconUri="/Icons/Delete.png" Text="Delete" Click="Delete_Icon_Click"/>
+            <shell:ApplicationBarIconButton IconUri="/Icons/Delete.png" Text="Picture" Click="TakePicture_Click"/>
             <!--<shell:ApplicationBar.MenuItems>
                 <shell:ApplicationBarMenuItem Text="MenuItem 1"/>
             </shell:ApplicationBar.MenuItems>-->

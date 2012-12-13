@@ -22,6 +22,7 @@ namespace gRouteTrack.Model
         private TimeSpan _fullTime;
         private ObservableCollection<GPoint> _coordinates;
         private bool _uploadCheck;
+        private double _totalDistance;
         #endregion
 
         #region Constructors
@@ -37,6 +38,7 @@ namespace gRouteTrack.Model
             this._fullTime = TimeSpan.FromSeconds(0);
             this._coordinates = new ObservableCollection<GPoint>();
             this._uploadCheck = false;
+            this._totalDistance = 0;
         }
 
         /// <summary>
@@ -54,6 +56,9 @@ namespace gRouteTrack.Model
 
         #region Properties
 
+        /// <summary>
+        /// Get or set route StartTime - when the route is first time started.
+        /// </summary>
         public DateTime StartTime
         {
             get
@@ -66,6 +71,9 @@ namespace gRouteTrack.Model
             }
         }
 
+        /// <summary>
+        /// Get or set route EndTime - when the route is stopped.
+        /// </summary>
         public DateTime EndTime
         {
             get
@@ -78,6 +86,10 @@ namespace gRouteTrack.Model
             }
         }
 
+        /// <summary>
+        /// Get or set full elasped time on this route. 
+        /// This is different from EndTime - StartTime beacause paused are not iclueded in full time.
+        /// </summary>
         public TimeSpan FullTime
         {
             get
@@ -90,6 +102,9 @@ namespace gRouteTrack.Model
             }
         }
 
+        /// <summary>
+        /// Get or set coordinates as List<GPoint>
+        /// </summary>
         public List<GPoint> CoordinatesList
         {
             get
@@ -102,6 +117,10 @@ namespace gRouteTrack.Model
             }
         }
 
+
+        /// <summary>
+        /// Get or set route coordinates as ObservableCollection<GPoint>
+        /// </summary>
         public ObservableCollection<GPoint> Coordinates
         {
             get
@@ -114,6 +133,9 @@ namespace gRouteTrack.Model
             }
         }
 
+        /// <summary>
+        /// Returns true if route has valid EndTime value.
+        /// </summary>
         public bool IsFinished
         {
             get
@@ -122,6 +144,9 @@ namespace gRouteTrack.Model
             }
         }
 
+        /// <summary>
+        /// Get the last entered point from route.
+        /// </summary>
         public GPoint LastPoint
         {
             get
@@ -137,6 +162,9 @@ namespace gRouteTrack.Model
             }
         }
 
+        /// <summary>
+        /// Get or set UploadCheck flag. True - user once marked that did not want to upload this route at that moment.
+        /// </summary>
         public bool UploadCheck
         {
             get
@@ -148,10 +176,30 @@ namespace gRouteTrack.Model
                 this._uploadCheck = value;
             }
         }
+
+        /// <summary>
+        /// Get or set route total distance
+        /// </summary>
+        public double TotalDistance
+        {
+            get 
+            {
+                return this._totalDistance;
+            }
+            set
+            {
+                this._totalDistance = value;
+            }
+        }
         #endregion
 
         #region PublicFunctions
 
+        /// <summary>
+        /// Add new point to the route.
+        /// </summary>
+        /// <param name="newPoint">GPoint object representing new point.</param>
+        /// <param name="resolvePointNumber">If True then newPoint.PointNumber is resolved from current route.</param>
         public void AddNewGPoint(GPoint newPoint, bool resolvePointNumber)
         {
             if (resolvePointNumber == true)
@@ -161,6 +209,9 @@ namespace gRouteTrack.Model
             this.Coordinates.Add(newPoint);
         }
 
+        /// <summary>
+        /// Stop's the current route. EndTime is setted to Now
+        /// </summary>
         public void StopRoute()
         {
             this.EndTime = DateTime.Now;

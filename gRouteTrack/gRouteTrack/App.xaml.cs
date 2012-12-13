@@ -17,6 +17,8 @@ using gRouteTrack.Model;
 using System.IO.IsolatedStorage;
 using System.IO;
 using System.Collections.ObjectModel;
+using System.Windows.Media.Imaging;
+using Microsoft.Phone;
 namespace gRouteTrack
 {
     public partial class App : Application
@@ -35,23 +37,19 @@ namespace gRouteTrack
             }
         }
 
-        private static MainViewModel viewModel = null;
-        /// <summary>
-        /// A static ViewModel used by the views to bind against.
-        /// </summary>
-        /// <returns>The MainViewModel object.</returns>
-        public static MainViewModel ViewModel
+        private static ConfigurationViewModel _configurationViewModel = null;
+        public static ConfigurationViewModel configurationViewModel
         {
             get
             {
-                // Delay creation of the view model until necessary
-                if (viewModel == null)
-                    viewModel = new MainViewModel();
+                if (_configurationViewModel == null)
+                {
+                    _configurationViewModel = new ConfigurationViewModel();
+                }
 
-                return viewModel;
+                return _configurationViewModel;
             }
         }
-
         /// <summary>
         /// Provides easy access to the root frame of the Phone Application.
         /// </summary>
@@ -98,18 +96,13 @@ namespace gRouteTrack
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
             LoadFromIsolatedStorage();
+            LoadSettings();
         }
 
         // Code to execute when the application is activated (brought to foreground)
         // This code will not execute when the application is first launched
         private void Application_Activated(object sender, ActivatedEventArgs e)
         {
-            // Ensure that application state is restored appropriately
-            if (!App.ViewModel.IsDataLoaded)
-            {
-                App.ViewModel.LoadData();
-            }
-
             if (e.IsApplicationInstancePreserved)
             {
                 LoadFromStateObject();
@@ -117,6 +110,7 @@ namespace gRouteTrack
             else
             {
                 LoadFromIsolatedStorage();
+                LoadSettings();
             }
         }
 
@@ -151,6 +145,10 @@ namespace gRouteTrack
             {
                 // An unhandled exception has occurred; break into the debugger
                 System.Diagnostics.Debugger.Break();
+            }
+            else
+            {
+                MessageBox.Show(e.ExceptionObject.Message);
             }
         }
 
@@ -246,6 +244,41 @@ namespace gRouteTrack
             App.DeleteFileFromIsolatedStorage("Routes.xml");
         }
 
+        public static void SaveSettings()
+        {
+            IsolatedStorageSettings settings = IsolatedStorageSettings.ApplicationSettings;
+            settings.Clear();
+
+            settings.Add("UserName", App.configurationViewModel.UserName);
+            settings.Add("Password", App.configurationViewModel.Password);
+            settings.Add("DistanceMeters", (Double)Decimal.Round((Decimal)App.configurationViewModel.DistanceInMeters, 0));
+
+            settings.Save();
+
+        }
+        public static void LoadSettings()
+        {
+            IsolatedStorageSettings settings = IsolatedStorageSettings.ApplicationSettings;
+
+            String searchValue = "";
+            settings.TryGetValue<String>("UserName", out searchValue);
+            if (string.IsNullOrWhiteSpace(searchValue) == false)
+            {
+                App.configurationViewModel.UserName = searchValue;
+                searchValue = "";
+                settings.TryGetValue<String>("Password", out searchValue);
+                if (string.IsNullOrWhiteSpace(searchValue) == false)
+                {
+                    App.configurationViewModel.Password = searchValue;
+                }
+            }
+
+            Double metersDistance;
+            if (settings.TryGetValue<Double>("DistanceMeters", out metersDistance))
+            {
+                App.configurationViewModel.DistanceInMeters = metersDistance;
+            }
+        }
         private void SaveToStateObject()
         {
             IDictionary<string, object> stateStore = PhoneApplicationService.Current.State;
@@ -255,6 +288,15 @@ namespace gRouteTrack
 
             stateStore.Remove("Routes");
             stateStore.Add("Routes", gRouteTrackViewModel.RoutesOnPhone.ToList<GRoute>());
+
+            stateStore.Remove("UserName");
+            stateStore.Add("UserName", configurationViewModel.UserName);
+
+            stateStore.Remove("Password");
+            stateStore.Add("Password", configurationViewModel.Password);
+
+            stateStore.Remove("DistanceMeters");
+            stateStore.Add("DistanceMeters", Double.Parse(Decimal.Round((Decimal)configurationViewModel.DistanceInMeters, 2).ToString()));
         }
         private static String LoadStringFromIsolatedStorage(String FileName)
         {
@@ -295,12 +337,43 @@ namespace gRouteTrack
                 MessageBox.Show("Loaded Routes from State object"); //TO-DO Log File
             }
 
+            if (PhoneApplicationService.Current.State.ContainsKey("UserName"))
+            {
+                configurationViewModel.UserName = (String)PhoneApplicationService.Current.State["UserName"];
+
+                if (PhoneApplicationService.Current.State.ContainsKey("Password"))
+                {
+                    configurationViewModel.Password = (String)PhoneApplicationService.Current.State["Password"];
+                }
+            }
+
+            if (PhoneApplicationService.Current.State.ContainsKey("DistanceMeters"))
+            {
+                configurationViewModel.DistanceInMeters = (Double)PhoneApplicationService.Current.State["DistanceMeters"];
+            }
+
+
             gRouteTrackViewModel.LocationServiceStatus = gSystemSettings.GLocationServiceStatus.Paused;
 
         }
         private static void DeleteFileFromIsolatedStorage(String FileName)
         {
             IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(FileName);
+        }
+
+        public static WriteableBitmap ReadImageFromIsolatedStorage(string fileName)
+        {
+            WriteableBitmap bitmap = new WriteableBitmap(200, 200);
+            using (IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                using (IsolatedStorageFileStream fileStream = myIsolatedStorage.OpenFile(fileName, FileMode.Open, FileAccess.Read))
+                {
+                    // Decode the JPEG stream.
+                    bitmap = PictureDecoder.DecodeJpeg(fileStream);
+                }
+            }
+
+            return bitmap;
         }
     }
 }

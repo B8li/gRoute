@@ -67,6 +67,7 @@ namespace gRouteTrack.ViewModels
                 this._routesOnPhone = value;
             }
         }
+       
         public TimeSpan FullTime
         {
             get
@@ -155,6 +156,14 @@ namespace gRouteTrack.ViewModels
             get
             {
                 return this.CurrentPoint.Altitude;
+            }
+        }
+
+        public double TotalDistance
+        {
+            get
+            {
+                return this.CurrentRoute.TotalDistance;
             }
         }
         #endregion
@@ -249,7 +258,9 @@ namespace gRouteTrack.ViewModels
                     break;
                 case gSystemSettings.GLocationServiceStatus.Paused:
                     this.Stop();
+                    this._locationService.LastPoint = null;
                     this.CurrentRoute.StopRoute();
+                    this.CurrentRoute.TotalDistance = this._locationService.CalculateTotalDistanceOnGPoints(this.CurrentRoute.CoordinatesList);
                     ResolveFinifshedRoute();
                     newStatus = gSystemSettings.GLocationServiceStatus.Stopped;
                     break;
@@ -320,11 +331,16 @@ namespace gRouteTrack.ViewModels
             RaisePropertyChanged("Speed");
             RaisePropertyChanged("SpeedKM");
             RaisePropertyChanged("Altitude");
+            RaisePropertyChanged("TotalDistance");
         }
         private void _locationService_OnNewGPoint(object o, GPointEventArgs e)
         {
             if (e.Point.IsValid)
             {
+                if (this.CurrentPoint != null && this.CurrentPoint.IsValid)
+                {
+                    this.CurrentRoute.TotalDistance = this._locationService.CalculateDistanceBetweenTwoGPoint(CurrentPoint, e.Point);
+                }
                 this.CurrentRoute.AddNewGPoint(e.Point, true);
                 RefreshRouteProperties();
             }

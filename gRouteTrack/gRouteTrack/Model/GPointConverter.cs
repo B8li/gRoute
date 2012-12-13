@@ -36,6 +36,19 @@ namespace gRouteTrack
             }
         }
 
+        private static double ConvertToDouble(string value)
+        {
+            Double valueDouble;
+            String decimalPointSeparator = System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+            value = value.Replace(",", ".").Replace(".", decimalPointSeparator);
+            valueDouble = 0;
+            if (!Double.TryParse(value, out valueDouble))
+            {
+                valueDouble = 0;
+                MessageBox.Show("Eror parsing to Double :" + value);
+            }
+            return valueDouble;
+        }
         #endregion
 
         #region Public Funcions
@@ -81,7 +94,7 @@ namespace gRouteTrack
             result += Environment.NewLine + "\t\t" + "<EndTime>" + route.EndTime.ToString("yyyy:MM:dd:HH:mm:ss") + "</EndTime> ";
             result += Environment.NewLine + "\t\t" + "<FullTime>" + route.FullTime.TotalSeconds + "</FullTime> ";
             result += Environment.NewLine + "\t\t" + "<UploadCheck>" + route.UploadCheck.ToString() + "</UploadCheck> ";
-
+            result += Environment.NewLine + "\t\t" + "<TotalDistance>" + route.TotalDistance.ToString() + "</TotalDistance> ";
 
             result += Environment.NewLine + "\t\t" + "<coordinates>";
             foreach (GPoint point in route.Coordinates)
@@ -115,8 +128,6 @@ namespace gRouteTrack
             GPoint point = new GPoint();
 
             String lineValue = "";
-            String decimalPointSeparator = System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-            double valueDouble = 0;
             try
             {
                 String[] lines = text.Split(split, StringSplitOptions.RemoveEmptyEntries);
@@ -142,6 +153,11 @@ namespace gRouteTrack
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
                         route.UploadCheck = Boolean.Parse(lineValue);
                     }
+                    else if (line.Contains("TotalDistance"))
+                    {
+                        lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
+                        route.TotalDistance = GPointConverter.ConvertToDouble(lineValue);
+                    }
                     else if (line.Contains("<point>"))
                     {
                         point = new GPoint();
@@ -149,42 +165,22 @@ namespace gRouteTrack
                     else if (line.Contains("Lon"))
                     {
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
-                        lineValue = lineValue.Replace(",", ".").Replace(".", decimalPointSeparator);
-                        valueDouble = 0;
-                        if (Double.TryParse(lineValue, out valueDouble))
-                        {
-                            point.Longitude = Double.Parse(lineValue);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Eror parsing to Double :" + lineValue);
-                        }
+                        point.Longitude = GPointConverter.ConvertToDouble(lineValue);
                     }
                     else if (line.Contains("Lat"))
                     {
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
-                        lineValue = lineValue.Replace(",", ".").Replace(".", decimalPointSeparator);
-                        valueDouble = 0;
-                        if (Double.TryParse(lineValue, out valueDouble))
-                        {
-                            point.Latitude = Double.Parse(lineValue);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Eror parsing to Double :" + lineValue);
-                        }
+                        point.Latitude = GPointConverter.ConvertToDouble(lineValue);
                     }
                     else if (line.Contains("Speed"))
                     {
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
-                        lineValue = lineValue.Replace(",", ".").Replace(".", decimalPointSeparator);
-                        point.Speed = Double.Parse(lineValue);
+                        point.Speed = GPointConverter.ConvertToDouble(lineValue);
                     }
                     else if (line.Contains("Alt"))
                     {
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
-                        lineValue = lineValue.Replace(",", ".").Replace(".", decimalPointSeparator);
-                        point.Altitude = Double.Parse(lineValue);
+                        point.Altitude = GPointConverter.ConvertToDouble(lineValue);
                     }
                     else if (line.Contains("Com"))
                     {
@@ -230,6 +226,7 @@ namespace gRouteTrack
                 result += Environment.NewLine + "\t\t" + "<EndTime>" + route.EndTime.ToString("yyyy:MM:dd:HH:mm:ss") + "</EndTime> ";
                 result += Environment.NewLine + "\t\t" + "<FullTime>" + route.FullTime.TotalSeconds + "</FullTime> ";
                 result += Environment.NewLine + "\t\t" + "<UploadCheck>" + route.UploadCheck.ToString() + "</UploadCheck> ";
+                result += Environment.NewLine + "\t\t" + "<TotalDistance>" + route.TotalDistance.ToString() + "</TotalDistance> ";
 
 
                 result += Environment.NewLine + "\t\t" + "<coordinates>";
@@ -266,8 +263,6 @@ namespace gRouteTrack
             GPoint point = new GPoint();
 
             String lineValue = "";
-            String decimalPointSeparator = System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-            double valueDouble = 0;
             try
             {
                 String[] lines = text.Split(split, StringSplitOptions.RemoveEmptyEntries);
@@ -297,6 +292,11 @@ namespace gRouteTrack
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
                         route.UploadCheck = Boolean.Parse(lineValue);
                     }
+                    else if (line.Contains("TotalDistance"))
+                    {
+                        lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
+                        route.TotalDistance = GPointConverter.ConvertToDouble(lineValue);
+                    }
                     else if (line.Contains("<point>"))
                     {
                         point = new GPoint();
@@ -304,42 +304,22 @@ namespace gRouteTrack
                     else if (line.Contains("Lon"))
                     {
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
-                        lineValue = lineValue.Replace(",", ".").Replace(".", decimalPointSeparator);
-                        valueDouble = 0;
-                        if (Double.TryParse(lineValue, out valueDouble))
-                        {
-                            point.Longitude = Double.Parse(lineValue);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Eror parsing to Double :" + lineValue);
-                        }
+                        point.Longitude = GPointConverter.ConvertToDouble(lineValue);
                     }
                     else if (line.Contains("Lat"))
                     {
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
-                        lineValue = lineValue.Replace(",", ".").Replace(".", decimalPointSeparator);
-                        valueDouble = 0;
-                        if (Double.TryParse(lineValue, out valueDouble))
-                        {
-                            point.Latitude = Double.Parse(lineValue);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Eror parsing to Double :" + lineValue);
-                        }
+                        point.Latitude = GPointConverter.ConvertToDouble(lineValue);
                     }
                     else if (line.Contains("Speed"))
                     {
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
-                        lineValue = lineValue.Replace(",", ".").Replace(".", decimalPointSeparator);
-                        point.Speed = Double.Parse(lineValue);
+                        point.Speed = GPointConverter.ConvertToDouble(lineValue);
                     }
                     else if (line.Contains("Alt"))
                     {
                         lineValue = Regex.Matches(line, pattern)[0].Groups[1].ToString();
-                        lineValue = lineValue.Replace(",", ".").Replace(".", decimalPointSeparator);
-                        point.Altitude = Double.Parse(lineValue);
+                        point.Altitude = GPointConverter.ConvertToDouble(lineValue);
                     }
                     else if (line.Contains("Com"))
                     {
